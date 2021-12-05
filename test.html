@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Projectile Motion</title>
+</head>
+
+<style>
+  html,
+  body {
+    height: 100vh;
+    background: linear-gradient(0deg,
+        rgba(34, 193, 195, 1) 0%,
+        rgba(253, 187, 45, 1) 100%);
+    text-align: center;
+    font-family: Comic Sans MS;
+    overflow: hidden;
+
+  }
+
+  canvas {
+
+    /* width: 180vmin;
+    height: 60vmin;  */
+    border: 2px solid green;
+    margin-left: auto;
+    margin-right: auto;
+
+    background: #A9DFBF;
+  }
+
+  .inputs {
+    position: relative;
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    margin-right: auto;
+    margin-left: auto;
+    top: 1%;
+
+
+  }
+
+  .input1,
+  .input2,
+  .input3,
+  .input4 {
+    display: block;
+    margin: 0 auto;
+    margin-bottom: 10px;
+
+  }
+
+  .input1,
+  .input2 {
+    width: 14%;
+    border-radius: 10px;
+    padding: 10px;
+    border: 2px solid #eee;
+    box-shadow: 0 0 15px 4px rgba(0, 0, 0, 0.06);
+  }
+
+  .input3,
+  .input4 {
+
+    width: 10%;
+    border-radius: 10px;
+    padding: 10px;
+    border: 2px solid #eee;
+    font-weight: bold;
+    background-color: #eb2632;
+    color: white;
+  }
+
+  .input4 {
+    background-color: green;
+  }
+
+  .input3:hover,
+  button:active {
+    background-color: white;
+    color: #eb2632;
+  }
+
+  #vError,
+  #aError {
+    display: none;
+    color: red;
+    font-size: medium;
+
+  }
+  @media only screen and (max-width: 921px) {
+    canvas{
+      width:95%;
+    }
+    .input1,.input2,.input3,.input4{
+      width: 30%;
+    }
+
+  }
+
+
+</style>
+
+<body>
+  <h2>Projectile Motion</h2>
+  <canvas id="canvas" width="900" height="500">
+    Your Browser does not support HTML5 tags
+  </canvas>
+  
+
+  <div class="inputs">
+
+    <input type="number" placeholder="Enter velocity" class="input1" id="velocity">
+    <span id="vError"></span>
+
+    <input type="number" placeholder="Enter angle" class="input2" id="angel">
+    <span id="aError"></span>
+
+    <button type="submit" class="input3" id="submit" onclick="init()">Launch</button>
+
+    <button type="button" class="input4" id="reset" onclick="ResetInput()">Reset</button>
+
+  </div>
+  <!--End Input section-->
+
+  <!---Start JS-->
+  <script>
+
+    var canvas = document.getElementById("canvas");
+    var drawing = canvas.getContext("2d");
+    var T = 0;                      //the time intialization of 0
+    var X0 = 0;                    // start position in X
+    var Y0 = canvas.height - 30;       // start position in Y (0,canvas.height-r)=(lower left corner)
+    var X = X0;                      //final position in X
+    var Y = Y0;                      //final position in Y
+    var angle = document.getElementById("angel");    // the angle that the user entered
+    var speed = document.getElementById("velocity"); // the speed that the user entered
+    var gravity = 9.8;
+
+    const vErr = document.getElementById("vError");
+    const aErr = document.getElementById("aError");
+
+
+    //start canvas drawing
+    drawing.save();
+    drawing.clearRect(0, 0, canvas.width, canvas.height);
+    drawing.beginPath();
+    drawing.arc(X, Y, 30, 0, 2 * Math.PI);
+    drawing.fillStyle = "black";
+    drawing.fill();
+    drawing.lineWidth = 1;
+    drawing.strokeStyle = "black";
+    drawing.stroke();
+    drawing.restore();
+    //end canvas drawing
+    
+
+    //Start Reset Function
+    function ResetInput() {
+      if (speed.value !== "") {
+        speed.value = "";
+      }
+      if (angle.value !== "") {
+        angle.value = "";
+
+      }
+
+      if (vErr.style.display == "block") {
+        vErr.style.display = "none";
+      }
+      if (aErr.style.display == "block") {
+        aErr.style.display = "none";
+      }
+
+      X0 = 0;
+      Y0 = canvas.height - 15;
+      X = X0;
+      Y = Y0;
+      T = 0;
+      location.reload();
+
+    }
+    //End Reset Function
+
+    //Start function
+    function init() {
+      if ((speed.value !== "" && speed.value > 0 && speed.value<91) && (angle.value !== "" && angle.value > 0)) {
+        update();
+      }
+      if(speed.value >=91){
+        vErr.innerHTML="<b>Please enter a velocity between 0-90</b>";
+        vErr.style.display = "block";
+      }
+
+      if (speed.value == "" || speed.value < 0) {
+        vErr.innerHTML = "<b>Please enter a valid velocity</b>";
+        vErr.style.display = "block";
+      }
+      if (angle.value == "" || angle.value < 0) {
+        aErr.innerHTML = "<b>Please enter a valid angle</b>";
+        aErr.style.display = "block";
+
+      }
+
+    }
+
+
+    /* Start The Update function */
+    function update() {
+
+      drawing.save();
+      drawing.clearRect(0, 0, canvas.width, canvas.height);
+      drawing.restore();
+
+      var myFunc = setInterval(function () {
+
+        Y = Y0 - (speed.value * Math.sin(angle.value * Math.PI / 180) * T - (1 / 2 * gravity * Math.pow(T, 2)));
+        X = speed.value * Math.cos(angle.value * Math.PI / 180) * T + X0; //Convert the angle from degree to radian 
+    
+        if (Y > canvas.height - 30 || X > canvas.width - 30) {
+          clearInterval(myFunc);
+        }
+
+        drawing.fillText("Distance in X: " + X, 50, 70, 120);
+        drawing.fillText("Distance in Y: " + Y, 50, 90, 120);
+        drawing.save();
+        drawing.clearRect(0, 0, canvas.width, canvas.height);
+        drawing.beginPath();
+        drawing.arc(X, Y, 30, 0, 2 * Math.PI);
+        drawing.fillStyle = "black";
+        drawing.fill();
+        drawing.lineWidth = 1;
+        drawing.strokeStyle = "black";
+        drawing.stroke();
+        drawing.font = '30px Arial';
+        drawing.fillText("Distance in X: " + X, 50, 70);
+        drawing.fillText("Distance in Y: " + Y, 50, 100);
+        drawing.restore();
+        T += 0.1;
+
+      }, 10);
+
+    }
+    /* End The Update function */
+
+  </script>
+
+</body>
+
+
+</html>
